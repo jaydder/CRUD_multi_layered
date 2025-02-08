@@ -1,12 +1,6 @@
-blinker==1.8.2
-click==8.1.7
-Flask==3.0.3
-itsdangerous==2.2.0
-Jinja2==3.1.4
-MarkupSafe==2.1.5
-Werkzeug==3.0.3
-peewee==3.17.3
-flask_wtf==1.2.1
-wtforms==3.1.2
+
+fastapi==0.95.2
+uvicorn[standard]==0.23.2
+SQLAlchemy==2.0.19
 psycopg2-binary
 python-dotenv

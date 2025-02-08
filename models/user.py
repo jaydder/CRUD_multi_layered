@@ -1,7 +1,10 @@
-import peewee
-from db import BaseModel, db
+from sqlalchemy import Column, Integer, String
+from db import Base
 
-class User(BaseModel):
-    id = peewee.AutoField()
-    name = peewee.CharField()
-    password = peewee.CharField()
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    password = Column(String, nullable=False)

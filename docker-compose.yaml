@@ -2,11 +2,8 @@ services:
   server:
     env_file: ".env"
     build: ./
-    entrypoint:
-      - flask
-      - run
-      - --host=0.0.0.0
-    ports: ["5000:5000"]
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["8000:8000"]
     volumes: ["./:/app"]
     networks:
       network:

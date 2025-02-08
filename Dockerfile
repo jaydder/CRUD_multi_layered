@@ -1,8 +1,18 @@
-FROM python:3.8-alpine
-EXPOSE 5000
-WORKDIR app
-COPY * /app
-RUN apk update && apk upgrade
-RUN apk add --no-cache sqlitebrowser~=3.12.2-r3
+FROM python:3.11-slim
+
+WORKDIR /app
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		build-essential \
+		libpq-dev \
+		gcc \
+	&& rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-CMD ["app.py" ]
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

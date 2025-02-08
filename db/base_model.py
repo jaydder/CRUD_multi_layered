@@ -1,11 +1,16 @@
-from peewee import Model, PostgresqlDatabase
 import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-db =  PostgresqlDatabase(database=os.environ.get('POSTGRES_DB'),
-                                    user=os.environ.get('POSTGRES_USER'),
-                                    password=os.environ.get('POSTGRES_PASSWORD'),
-                                    host=os.environ.get('POSTGRES_HOST'))
+# Build the database URL from environment variables
+DB_USER = os.environ.get('POSTGRES_USER', 'postgres')
+DB_PASS = os.environ.get('POSTGRES_PASSWORD', '')
+DB_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
+DB_NAME = os.environ.get('POSTGRES_DB', 'postgres')
 
-class BaseModel(Model):
-    class Meta:
-       database = db
+DATABASE_URL = f'postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
+
+engine = create_engine(DATABASE_URL, echo=False, future=True)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+Base = declarative_base()

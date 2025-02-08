@@ -1,15 +1,17 @@
 import os
-from flask import Flask
-from controller import controller
+import uvicorn
+from fastapi import FastAPI
+from utils.custom_logger import configure_logging
+from controller.user_controller import router as user_router
 
-class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY')
 
-app = Flask(__name__)
-app.config.from_object(Config)
-app.register_blueprint(controller)
+configure_logging()
+
+app = FastAPI(title='CRUD Multi Layered - FastAPI')
+
+app.include_router(user_router)
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(port=port, debug=True)
+    port = int(os.environ.get('PORT', 8000))
+    uvicorn.run('app:app', host='0.0.0.0', port=port, reload=True)
