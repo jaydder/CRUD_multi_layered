@@ -1,77 +1,108 @@
-# CRUD Multi Layered
+# CRUD Multi Layered (FastAPI + SQLAlchemy)
 
-This project has created to study multi layers in python using *docker* to up server web flask and database *postgres*.
+This project demonstrates a layered Python web app (controller → service → repository) now migrated to FastAPI and SQLAlchemy with a PostgreSQL backend. It is intended for learning and small demos.
 
-this application use .env file to security.
+Highlights
+- FastAPI-based JSON API (interactive docs at /docs)
+- SQLAlchemy ORM for DB access (Postgres)
+- Layered architecture: controller → service → repository
+- Structured logging configurable via LOG_LEVEL
 
-## Endpoints
+Security note
+IMPORTANT: Passwords are stored in plaintext in this demo. Do NOT use this in production. Replace with bcrypt/argon2 and never return passwords in API responses.
 
+Environment variables (important)
+- POSTGRES_USER — DB user
+- POSTGRES_PASSWORD — DB password
+- POSTGRES_HOST — DB host (for Docker compose this is the service name)
+- POSTGRES_DB — DB name
+- LOG_LEVEL — optional (DEBUG, INFO, WARNING, ERROR)
+- PORT — optional port for the app (defaults to 8000)
 
-`POST /`
+API endpoints
+- GET  /             — list users (JSON)
+- POST /             — create user (JSON body: {name, password})
+- GET  /{id}         — get single user
+- PUT/PATCH /{id}    — update user (JSON: name and/or password)
+- DELETE /{id}       — delete user
 
-    register new user , using fields "name"  and "password"
+How to run (local)
+1. Create and activate a virtual environment:
 
-# CRUD Multi Layered
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-Minimal Flask app demonstrating a layered architecture (controller → service → repository) using Peewee and a relational database.
+2. Install dependencies:
 
-This repository is intended for learning and small demos. It includes a responsive Bootstrap UI, inline modal updates, and structured logging to help debug features.
+```bash
+pip install -r requirements.txt
+```
 
-## Features
-- Create users (simple username + password model)
-- List users in a responsive table
-- Update users inline using a Bootstrap modal (same-page UX)
-- Delete users from the list
-- Structured logging (console) with configurable log level
+3. Provide DB environment variables (use `.env` file or export in shell). Example `.env`:
 
-IMPORTANT: This project stores passwords in plaintext for demonstration only. Do NOT use this approach in production — always hash passwords (bcrypt/argon2) and never display them.
+```env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_HOST=localhost
+POSTGRES_DB=postgres
+LOG_LEVEL=DEBUG
+```
 
-## Environment variables
-- SECRET_KEY: required by Flask-WTF for CSRF protection
-- FLASK_DEBUG: control Flask debug mode (1/0)
-- FLASK_APP: Flask app path (not required to run via `python app.py`)
-- POSTGRES_DB: database name (if using Docker-compose postgres)
-- POSTGRES_USER: DB user
-- POSTGRES_PASSWORD: DB password
-- POSTGRES_HOST: DB host
-- LOG_LEVEL: optional, logging level (DEBUG, INFO, WARNING, ERROR). Default: DEBUG
-
-## Endpoints / UI
-- GET / — main page: registration form (left) and users table (right). Update opens a modal.
-- POST / — same endpoint handles create, delete and update actions (POST form fields determine action)
-
-Notes on forms
-- Registration form uses `LoginForm` (username, password)
-- Update form uses `UpdateForm` and is submitted from a modal on the same page. The controller recognizes the hidden `update` field to perform the update.
-
-## How to run
-1. (Optional) Create a `.env` file with the environment variables listed above.
-2. To run locally without Docker:
+4. Start the app:
 
 ```bash
 python3 app.py
+# or run uvicorn directly:
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-3. To run with Docker Compose (if you have a docker-compose setup with Postgres configured):
+How to run with Docker Compose
+
+1. Build and start services:
 
 ```bash
+docker compose build
 docker compose up
 ```
 
-You can control logging verbosity with:
+The API will be available on port 8000 by default (container exposes 8000).
+
+Quick curl examples
+
+Create a user
 
 ```bash
-export LOG_LEVEL=INFO 
-python3 app.py
+curl -X POST http://127.0.0.1:8000/ -H 'Content-Type: application/json' -d '{"name":"alice","password":"pass"}'
 ```
 
-## Project structure (important files)
-- `app.py` — Flask app and logging configuration
-- `controller/user_controller.py` — routes and request handling
-- `service/user_service.py` — business logic and exception logging
-- `repository/user_respository.py` — DB operations (Peewee)
-- `models/user.py` — Peewee model
-- `templates/index.html` — responsive UI and update modal
+List users
 
-## License / Disclaimer
-This code is educational. Review and harden it before any real deployment.
+```bash
+curl http://127.0.0.1:8000/
+```
+
+Get user
+
+```bash
+curl http://127.0.0.1:8000/1
+```
+
+Project structure (important files)
+- `app.py` — FastAPI app and uvicorn runner
+- `controller/user_controller.py` — FastAPI router (API endpoints)
+- `service/user_service.py` — business logic and logging
+- `repository/user_respository.py` — SQLAlchemy-based DB operations
+- `models/user.py` — SQLAlchemy model
+- `db/base_model.py` — SQLAlchemy engine, SessionLocal, Base
+- `requirements.txt` — Python dependencies
+
+Next recommended improvements
+- Hash passwords (bcrypt/argon2) and remove them from API responses
+- Add Pydantic models for request/response validation
+- Add tests using FastAPI's TestClient
+- Add a small entrypoint script to wait for Postgres in Docker before starting the app
+
+License / Disclaimer
+This code is educational. Review, test, and harden it before any real deployment.
